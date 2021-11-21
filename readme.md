@@ -1,59 +1,19 @@
-# Initial steps
+# Video capture Chrome extension
 
-## Install
+This Chrome extension lets you capture streams from a html video tag (if it isn't DRM protected).
 
-Follow the [Webpack getting started guide](https://webpack.js.org/guides/getting-started/) and the [Typescript basis setup](https://webpack.js.org/guides/typescript/):
+## Disclaimer
 
-- `npm init -y`: create package.json
-- `npm install --save-dev webpack webpack-cli`: install webpack
-- `npm install --save-dev typescript ts-loader`: install typescript
-- `npm install --save-dev @types/chrome`: let typescript know about the chrome types
-- `npm install --save-dev @types/dom-mediacapture-record`: let typescript know about the MediaRecorder
-- `npm install --save-dev copy-webpack-plugin`: to be able to configure copy actions in `webpack.config.json` for files like `manifest.json`, images, ... assets to de `dist` folder
+This is by no means perfect. I just wanted to dabble a bit into making a Chrome extension and play with the MediaRecorder lib.
 
-Add `.gitignore`.
+## Possible upcoming features
 
-Create folder structure in `src` folder.
+- Event handlers and css pointer events on the video that prevent the context menu from showing when right clicking a video element: <sup>[6]</sup>
+  - We could either remove all these settings from all video elements, but that may be a bit too intrusive and would probably disable some custom player interaction.
+  - I added a popup window to the extension that reads all `video` tags and lists them up. Then we can start recording from the popup, instead of the video context menu.
+- Enable/disable extension per page <sup>[7]?</sup>
+- Use `import` (module support) to share the action names instead of duplicating it and keeping it in sync on both background and content scripts <sup>[10]?</sup>
 
-## Config
-
-- update `package.json`
-  - remove `"main": "index.js",` (not applicable for a chrome extension)
-  - add `"build": "webpack"` to `scripts`
-- update `webpack.config.js`:
-
-  ```
-  devtool: 'source-map',
-
-  entry: {
-    content: './src/app/content.ts',
-    background: './src/app/background.ts',
-    popup: './src/app/popup.ts',
-  },
-
-  output: {
-    path: path.resolve(__dirname, 'dist/js'),
-    filename: '[name].js'
-  },
-  ```
-
-- update `tsconfig.js`
-
-  ```
-  "compilerOptions"{
-    "alwaysStrict": true,
-  },
-
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
-  ```
-
-## Troubleshooting
-
-- `npm run build` did not do anything, however `npx webpack` worked. Not feeling like enabling scripts globally (`npm config set ignore-scripts false`), I added an `.npmrc` config to the project.
-- The background service worker `background.js` _must_ be in the root directory of the plugin, or the extension will fail to load.
-- Because the `captureStream` is still in draft, it was not available on the interface of `HTMLMediaElement`. Instead of creating a new interface that extends, this can be fixed thanks to typescript's interface merging capabilities and augmenting the global scope (see `interfaces.ts`).
+[6]: https://developer.chrome.com/docs/extensions/mv3/options/
+[7]: https://developer.chrome.com/docs/extensions/mv3/user_interface/
+[10]: https://medium.com/front-end-weekly/es6-modules-in-chrome-extensions-an-introduction-313b3fce955b
